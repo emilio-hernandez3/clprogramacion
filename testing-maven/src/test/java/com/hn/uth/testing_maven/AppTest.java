@@ -146,7 +146,7 @@ public class AppTest {
 	@AfterClass
 	public static void metodoTearDownClass() {
 		//SE EJECUTA AL FINALIZAR TODOS LOS TEST
-		System.out.println("Pruebas automatizadas finalizadas");
+		System.out.println("Pruebas automatizadas terminadas");
 	}
 	
 	
