@@ -1,0 +1,37 @@
+package com.hn.uth.testing_maven;
+
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+/**
+ * Unit test for simple App.
+ */
+public class AppTest {
+
+	
+	@Test
+	public void pruebaSuma1() {
+		assertTrue(App.sumar(2,2) == 4);
+	}
+	
+	@Test
+	public void pruebaSuma2() {
+		assertTrue(App.sumar(0,3) == 3);
+	}
+	
+	@Test
+	public void pruebaSuma3() {
+		assertTrue(App.sumar(-1,4) == 3);
+	}
+	
+	@Test
+	public void pruebaSuma4() {
+		assertTrue(App.sumar(0.5,0.3) == 0.8);
+	}
+	
+	@Test
+	public void pruebaSuma5() {
+		assertTrue(App.sumar(9999999,888888) == 10888887);
+	}
+}

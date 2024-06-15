@@ -1,0 +1,80 @@
+package com.hn.uth.testing_maven;
+
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.BeforeClass;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+/**
+ * Unit test for simple App.
+ */
+public class AppTest {
+
+	@Before
+	public void metodoSetup() {
+		System.out.println("Ejecutando metodo setup");
+	}
+	
+	@BeforeClass
+	public void metodoSetupClass() {
+		System.out.println("Ejecutando metodo setup Class");
+	}
+	
+	
+	@Test
+	public void pruebaSuma1() {
+		assertTrue(App.sumar(2,2) == 4);
+	}
+	
+	@Test
+	public void pruebaSuma2() {
+		assertTrue(App.sumar(0,3) == 3);
+	}
+	
+	@Test
+	public void pruebaSuma3() {
+		assertTrue(App.sumar(-1,4) == 3);
+	}
+	
+	@Test
+	public void pruebaSuma4() {
+		assertTrue(App.sumar(0.5,0.3) == 0.8);
+	}
+	
+	@Test
+	public void pruebaSuma5() {
+		assertTrue(App.sumar(9999999,888888) == 10888887);
+	}
+	
+	@Test
+	public void pruebaResta1() {
+		assertEquals(App.restar(2,1), 1, 0.01);
+	}
+	
+	@Test
+	public void pruebaResta2() {
+		assertTrue(App.restar(1,5)== -4);
+	}
+	
+	@Test
+	public void pruebaResta3() {
+		assertTrue(App.restar(0.0,1.0)== -1.0);
+	}
+	
+	@Test
+	public void pruebaResta4() {
+		assertEquals(App.restar(3.0,0.0), 3.0, 0.01);
+	}
+	
+	@Test
+	public void pruebaResta5() {
+		assertEquals(App.restar(-1.0,1.0), -2, 0.0001);
+	}
+	
+	
+	
+}
