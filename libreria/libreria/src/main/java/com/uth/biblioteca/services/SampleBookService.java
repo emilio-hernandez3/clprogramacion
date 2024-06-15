@@ -1,6 +1,6 @@
 package com.uth.biblioteca.services;
 
-import com.uth.biblioteca.data.SampleBook;
+import com.uth.biblioteca.data.Libro;
 import com.uth.biblioteca.data.SampleBookRepository;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -17,11 +17,11 @@ public class SampleBookService {
         this.repository = repository;
     }
 
-    public Optional<SampleBook> get(Long id) {
+    public Optional<Libro> get(Long id) {
         return repository.findById(id);
     }
 
-    public SampleBook update(SampleBook entity) {
+    public Libro update(Libro entity) {
         return repository.save(entity);
     }
 
@@ -29,11 +29,11 @@ public class SampleBookService {
         repository.deleteById(id);
     }
 
-    public Page<SampleBook> list(Pageable pageable) {
+    public Page<Libro> list(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
-    public Page<SampleBook> list(Pageable pageable, Specification<SampleBook> filter) {
+    public Page<Libro> list(Pageable pageable, Specification<Libro> filter) {
         return repository.findAll(filter, pageable);
     }
 

@@ -6,13 +6,14 @@ import jakarta.persistence.Lob;
 import java.time.LocalDate;
 
 @Entity
-public class SampleBook extends AbstractEntity {
+public class Libro extends AbstractEntity {
 
     @Lob
     @Column(length = 1000000)
     private byte[] image;
     private String name;
     private String author;
+    private String editorial;
     private LocalDate publicationDate;
     private Integer pages;
     private String isbn;
@@ -53,5 +54,11 @@ public class SampleBook extends AbstractEntity {
     public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
+	public String getEditorial() {
+		return editorial;
+	}
+	public void setEditorial(String editorial) {
+		this.editorial = editorial;
+	}
 
 }

@@ -1,8 +1,9 @@
 package com.uth.biblioteca.views.libros;
 
-import com.uth.biblioteca.data.SampleBook;
+import com.uth.biblioteca.data.Libro;
 import com.uth.biblioteca.services.SampleBookService;
 import com.uth.biblioteca.views.MainLayout;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -33,10 +35,14 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.icon.Icon;
 
 @PageTitle("Libros")
 @Route(value = "/:sampleBookID?/:action?(edit)", layout = MainLayout.class)
@@ -46,7 +52,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     private final String SAMPLEBOOK_ID = "sampleBookID";
     private final String SAMPLEBOOK_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
-    private final Grid<SampleBook> grid = new Grid<>(SampleBook.class, false);
+    private final Grid<Libro> grid = new Grid<>(Libro.class, false);
 
     private Upload image;
     private Image imagePreview;
@@ -55,13 +61,14 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     private DatePicker publicationDate;
     private TextField pages;
     private TextField isbn;
+    private TextField editorial;
 
     private final Button cancel = new Button("Cancelar");
     private final Button save = new Button("Guardar");
 
-    private final BeanValidationBinder<SampleBook> binder;
+    private final BeanValidationBinder<Libro> binder;
 
-    private SampleBook sampleBook;
+    private Libro sampleBook;
 
     private final SampleBookService sampleBookService;
 
@@ -78,21 +85,22 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         add(splitLayout);
 
         // Configure Grid
-        LitRenderer<SampleBook> imageRenderer = LitRenderer
-                .<SampleBook>of("<img style='height: 64px' src=${item.image} />").withProperty("image", item -> {
+        LitRenderer<Libro> imageRenderer = LitRenderer
+                .<Libro>of("<img style='height: 64px' src=${item.image} />").withProperty("image", item -> {
                     if (item != null && item.getImage() != null) {
                         return "data:image;base64," + Base64.getEncoder().encodeToString(item.getImage());
                     } else {
                         return "";
                     }
                 });
-        grid.addColumn(imageRenderer).setHeader("Image").setWidth("68px").setFlexGrow(0);
+        grid.addColumn(imageRenderer).setHeader("Portada").setWidth("68px").setFlexGrow(0);
 
-        grid.addColumn("name").setAutoWidth(true);
-        grid.addColumn("author").setAutoWidth(true);
-        grid.addColumn("publicationDate").setAutoWidth(true);
-        grid.addColumn("pages").setAutoWidth(true);
-        grid.addColumn("isbn").setAutoWidth(true);
+        grid.addColumn("name").setAutoWidth(true).setHeader("Nombre");
+        grid.addColumn("author").setAutoWidth(true).setHeader("Autor");
+        grid.addColumn("editorial").setAutoWidth(true).setHeader("Editorial");
+        grid.addColumn("publicationDate").setAutoWidth(true).setHeader("Fecha de Publicación");
+        grid.addColumn("pages").setAutoWidth(true).setHeader("Pags.");
+        grid.addColumn("isbn").setAutoWidth(true).setHeader("ISBN");
         grid.setItems(query -> sampleBookService.list(
                 PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
                 .stream());
@@ -109,7 +117,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         });
 
         // Configure Form
-        binder = new BeanValidationBinder<>(SampleBook.class);
+        binder = new BeanValidationBinder<>(Libro.class);
 
         // Bind fields. This is where you'd define e.g. validation rules
         binder.forField(pages).withConverter(new StringToIntegerConverter("Only numbers are allowed")).bind("pages");
@@ -126,7 +134,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         save.addClickListener(e -> {
             try {
                 if (this.sampleBook == null) {
-                    this.sampleBook = new SampleBook();
+                    this.sampleBook = new Libro();
                 }
                 binder.writeBean(this.sampleBook);
                 sampleBookService.update(this.sampleBook);
@@ -140,7 +148,26 @@ public class LibrosView extends Div implements BeforeEnterObserver {
                 n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (ValidationException validationException) {
-                Notification.show("Failed to update the data. Check again that all values are valid");
+      
+                
+                Notification notification = new Notification();
+                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+                Div text = new Div(new Text("El nombre debe de tener entre 3 a 80 caracteres"));
+
+                Button closeButton = new Button(new Icon("lumo", "cross"));
+                closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+                closeButton.setAriaLabel("Close");
+                closeButton.addClickListener(event -> {
+                    notification.close();
+                });
+
+                HorizontalLayout layout = new HorizontalLayout(text, closeButton);
+                layout.setAlignItems(Alignment.CENTER);
+
+                notification.add(layout);
+                notification.setPosition(Position.BOTTOM_STRETCH);
+                notification.open();
             }
         });
     }
@@ -149,7 +176,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> sampleBookId = event.getRouteParameters().get(SAMPLEBOOK_ID).map(Long::parseLong);
         if (sampleBookId.isPresent()) {
-            Optional<SampleBook> sampleBookFromBackend = sampleBookService.get(sampleBookId.get());
+            Optional<Libro> sampleBookFromBackend = sampleBookService.get(sampleBookId.get());
             if (sampleBookFromBackend.isPresent()) {
                 populateForm(sampleBookFromBackend.get());
             } else {
@@ -170,20 +197,43 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         Div editorDiv = new Div();
         editorDiv.setClassName("editor");
         editorLayoutDiv.add(editorDiv);
+        LocalDate now = LocalDate.now(ZoneId.systemDefault());
 
         FormLayout formLayout = new FormLayout();
-        NativeLabel imageLabel = new NativeLabel("Image");
+        NativeLabel imageLabel = new NativeLabel("Portada");
         imagePreview = new Image();
         imagePreview.setWidth("100%");
         image = new Upload();
         image.getStyle().set("box-sizing", "border-box");
         image.getElement().appendChild(imagePreview.getElement());
-        name = new TextField("Name");
-        author = new TextField("Author");
-        publicationDate = new DatePicker("Publication Date");
-        pages = new TextField("Pages");
+        name = new TextField("Nombre del Libro");
+        name.setPrefixComponent(VaadinIcon.NOTEBOOK.create());
+        name.setMinLength(3);
+        name.setMaxLength(80);
+        name.setErrorMessage("El nombre debe de tener entre 3 a 80 caracteres");
+        
+        
+        author = new TextField("Autor");
+        author.setPrefixComponent(VaadinIcon.USER_STAR.create());
+        author.setMinLength(5);
+        author.setMaxLength(65);
+        
+        publicationDate = new DatePicker("Fecha de Publicación");
+        publicationDate.setHelperText("Fecha de inicio de ventas del libro");
+        publicationDate.setMax(now.plusDays(1));
+        
+        pages = new TextField("Cantidad de Páginas");
+        pages.setPrefixComponent(VaadinIcon.ABACUS.create());
+        
         isbn = new TextField("Isbn");
-        formLayout.add(imageLabel, image, name, author, publicationDate, pages, isbn);
+        isbn.setPrefixComponent(VaadinIcon.BARCODE.create());
+        
+        editorial = new TextField("Editorial");
+        editorial.setClearButtonVisible(true);
+        editorial.setPrefixComponent(VaadinIcon.BOOK.create());
+        editorial.setHelperText("Nombre de la Casa Editorial");
+        
+        formLayout.add(imageLabel, image, name, author, editorial, publicationDate, pages, isbn);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
@@ -220,7 +270,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
             preview.setSrc(resource);
             preview.setVisible(true);
             if (this.sampleBook == null) {
-                this.sampleBook = new SampleBook();
+                this.sampleBook = new Libro();
             }
             this.sampleBook.setImage(uploadBuffer.toByteArray());
         });
@@ -236,7 +286,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         populateForm(null);
     }
 
-    private void populateForm(SampleBook value) {
+    private void populateForm(Libro value) {
         this.sampleBook = value;
         binder.readBean(this.sampleBook);
         this.imagePreview.setVisible(value != null);
