@@ -3195,3 +3195,6 @@ org.eclipse.core.runtime.CoreException: Could not resolve artifact com.vaadin:va
 2024-06-14 18:24:21,742 [Worker-26: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\projects\ProgAvanzada2_2024_02\ejercicio_clase_1\ejercicio1\src\main\resources
 2024-06-14 18:24:21,749 [Worker-26: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
 2024-06-14 18:24:21,749 [Worker-26: Building] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\projects\ProgAvanzada2_2024_02\ejercicio_clase_1\ejercicio1\src\test\resources
+2024-06-14 18:42:23,610 [Worker-33: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-06-14 18:42:23,690 [Worker-33: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 3 resources from src\main\resources to target\classes
+2024-06-14 18:42:23,722 [Worker-33: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\projects\ProgAvanzada2_2024_02\libreria\libreria\src\test\resources
