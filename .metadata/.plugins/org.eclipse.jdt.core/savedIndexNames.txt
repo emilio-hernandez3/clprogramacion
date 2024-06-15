@@ -43,7 +43,6 @@ INDEX VERSION 1.132+C:\projects\ProgAvanzada2_2024_02\.metadata\.plugins\org.ecl
 2118935329.index
 1782197870.index
 1152228030.index
-186540425.index
 2266130050.index
 1154526112.index
 1120924328.index
@@ -66,7 +65,6 @@ INDEX VERSION 1.132+C:\projects\ProgAvanzada2_2024_02\.metadata\.plugins\org.ecl
 1276815787.index
 2848897406.index
 2551041345.index
-3274760708.index
 3565421836.index
 1436326332.index
 3486695266.index
