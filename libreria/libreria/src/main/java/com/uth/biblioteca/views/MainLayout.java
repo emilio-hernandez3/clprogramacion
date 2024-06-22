@@ -51,8 +51,8 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        nav.addItem(new SideNavItem("Libros", LibrosView.class, LineAwesomeIcon.BOOK_DEAD_SOLID.create()));
-        nav.addItem(new SideNavItem("Autores", AutoresView.class, LineAwesomeIcon.PERSON_BOOTH_SOLID.create()));
+        nav.addItem(new SideNavItem("Listado de Libros", LibrosView.class, LineAwesomeIcon.BOOK_DEAD_SOLID.create()));
+        nav.addItem(new SideNavItem("Autores de los Libros", AutoresView.class, LineAwesomeIcon.PERSON_BOOTH_SOLID.create()));
 
         return nav;
     }

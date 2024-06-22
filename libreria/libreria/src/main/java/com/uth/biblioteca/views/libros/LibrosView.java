@@ -44,7 +44,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.icon.Icon;
 
-@PageTitle("Libros")
+@PageTitle("Libros de la Biblioteca")
 @Route(value = "/:sampleBookID?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 public class LibrosView extends Div implements BeforeEnterObserver {
@@ -131,6 +131,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
             refreshGrid();
         });
 
+        save.setId("btnGuardar");
         save.addClickListener(e -> {
             try {
                 if (this.sampleBook == null) {
@@ -207,6 +208,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         image.getStyle().set("box-sizing", "border-box");
         image.getElement().appendChild(imagePreview.getElement());
         name = new TextField("Nombre del Libro");
+        name.setId("txtNombreLibro");
         name.setPrefixComponent(VaadinIcon.NOTEBOOK.create());
         name.setMinLength(3);
         name.setMaxLength(80);

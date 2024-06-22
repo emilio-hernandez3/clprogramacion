@@ -4,6 +4,7 @@ import com.uth.biblioteca.views.MainLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -64,8 +65,8 @@ public class AutoresView extends Div implements AfterNavigationObserver {
         actions.setSpacing(false);
         actions.getThemeList().add("spacing-s");
 
-        Icon likeIcon = VaadinIcon.HEART.create();
-        likeIcon.addClassName("icon");
+        Icon calendarIcon = VaadinIcon.CALENDAR.create();
+        calendarIcon.addClassName("icon");
         Span likes = new Span(person.getLikes());
         likes.addClassName("likes");
         Icon commentIcon = VaadinIcon.COMMENT.create();
@@ -77,7 +78,7 @@ public class AutoresView extends Div implements AfterNavigationObserver {
         Span shares = new Span(person.getShares());
         shares.addClassName("shares");
 
-        actions.add(likeIcon, likes, commentIcon, comments, shareIcon, shares);
+        actions.add(calendarIcon, likes, commentIcon, comments, shareIcon, shares);
 
         description.add(header, post, actions);
         card.add(image, description);
@@ -89,51 +90,51 @@ public class AutoresView extends Div implements AfterNavigationObserver {
 
         // Set some data when this view is displayed.
         List<Person> persons = Arrays.asList( //
-                createPerson("https://randomuser.me/api/portraits/men/42.jpg", "John Smith", "May 8",
+                createPerson("https://randomuser.me/api/portraits/lego/1.jpg", "John Smith", "May 8",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/42.jpg", "Abagail Libbie", "May 3",
+                        "30-01-2000", "500", "20"),
+                createPerson("https://images.generated.photos/fv5EshOEjj9ggRzKYlpxrsuSJ-x1TPlEpQfXFB-E9dU/rs:fit:512:512/wm:0.95:sowe:18:18:0.33/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92M18w/NjEwMDEzLmpwZw.jpg", "Abagail Libbie", "May 3",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/men/24.jpg", "Alberto Raya", "May 3",
+                        "27-11-1998", "500", "20"),
+                createPerson("https://cdn-icons-png.flaticon.com/256/10776/10776333.png", "Alberto Raya", "May 3",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/24.jpg", "Emmy Elsner", "Apr 22",
+                        "30-04-2002", "500", "20"),
+                createPerson("https://randomuser.me/api/portraits/lego/2.jpg", "Emmy Elsner", "Apr 22",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "03-05-1995", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/men/76.jpg", "Alf Huncoot", "Apr 21",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
-                createPerson("https://randomuser.me/api/portraits/women/76.jpg", "Lidmila Vilensky", "Apr 17",
+                        "10-10-2001", "500", "20"),
+                createPerson("https://randomuser.me/api/portraits/lego/3.jpg", "Lidmila Vilensky", "Apr 17",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "01-01-1993", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/men/94.jpg", "Jarrett Cawsey", "Apr 17",
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "09-07-2004", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/women/94.jpg", "Tania Perfilyeva", "Mar 8",
 
-                        "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "In publishsing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
+                        "30-01-2000", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/men/16.jpg", "Ivan Polo", "Mar 5",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "30-01-2000", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/women/16.jpg", "Emelda Scandroot", "Mar 5",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "30-01-2000", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/men/67.jpg", "Marcos Sá", "Mar 4",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20"),
+                        "30-01-2000", "500", "20"),
                 createPerson("https://randomuser.me/api/portraits/women/67.jpg", "Jacqueline Asong", "Mar 2",
 
                         "In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking).",
-                        "1K", "500", "20")
+                        "30-01-2000", "500", "20")
 
         );
 

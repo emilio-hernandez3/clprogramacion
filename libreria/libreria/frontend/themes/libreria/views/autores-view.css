@@ -44,8 +44,8 @@
 }
 
 .autores-view .post {
-  color: var(--lumo-secondary-text-color);
-  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-body-text-color);
+  font-size: var(--lumo-font-size-xl);
   margin-bottom: var(--lumo-space-s);
   white-space: normal;
 }
