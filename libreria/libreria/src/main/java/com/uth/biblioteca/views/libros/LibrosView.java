@@ -126,6 +126,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
 
         attachImageUpload(image, imagePreview);
 
+        cancel.setId("btnCancelar");
         cancel.addClickListener(e -> {
             clearForm();
             refreshGrid();
@@ -204,7 +205,9 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         NativeLabel imageLabel = new NativeLabel("Portada");
         imagePreview = new Image();
         imagePreview.setWidth("100%");
+        
         image = new Upload();
+        image.setId("uploadPortada");
         image.getStyle().set("box-sizing", "border-box");
         image.getElement().appendChild(imagePreview.getElement());
         name = new TextField("Nombre del Libro");
@@ -216,21 +219,26 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         
         
         author = new TextField("Autor");
+        author.setId("txtAutorLibro");
         author.setPrefixComponent(VaadinIcon.USER_STAR.create());
         author.setMinLength(5);
         author.setMaxLength(65);
         
         publicationDate = new DatePicker("Fecha de Publicación");
+        publicationDate.setId("publicationDatePicker");
         publicationDate.setHelperText("Fecha de inicio de ventas del libro");
         publicationDate.setMax(now.plusDays(1));
         
         pages = new TextField("Cantidad de Páginas");
+        pages.setId("txtCantidadPaginas");
         pages.setPrefixComponent(VaadinIcon.ABACUS.create());
         
         isbn = new TextField("Isbn");
+        isbn.setId("txtIsbn");
         isbn.setPrefixComponent(VaadinIcon.BARCODE.create());
         
         editorial = new TextField("Editorial");
+        editorial.setId("txtEditorial");
         editorial.setClearButtonVisible(true);
         editorial.setPrefixComponent(VaadinIcon.BOOK.create());
         editorial.setHelperText("Nombre de la Casa Editorial");
