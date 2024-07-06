@@ -1,15 +1,9 @@
 package com.uth.biblioteca.data;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 import java.time.LocalDate;
 
-@Entity
-public class Libro extends AbstractEntity {
+public class Libro  {
 
-    @Lob
-    @Column(length = 1000000)
     private byte[] image;
     private String name;
     private String author;

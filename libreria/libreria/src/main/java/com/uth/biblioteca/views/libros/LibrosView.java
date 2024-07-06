@@ -1,7 +1,6 @@
 package com.uth.biblioteca.views.libros;
 
 import com.uth.biblioteca.data.Libro;
-import com.uth.biblioteca.services.SampleBookService;
 import com.uth.biblioteca.views.MainLayout;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -70,10 +69,7 @@ public class LibrosView extends Div implements BeforeEnterObserver {
 
     private Libro sampleBook;
 
-    private final SampleBookService sampleBookService;
-
-    public LibrosView(SampleBookService sampleBookService) {
-        this.sampleBookService = sampleBookService;
+    public LibrosView() {
         addClassNames("libros-view");
 
         // Create UI
@@ -101,9 +97,6 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         grid.addColumn("publicationDate").setAutoWidth(true).setHeader("Fecha de Publicación");
         grid.addColumn("pages").setAutoWidth(true).setHeader("Pags.");
         grid.addColumn("isbn").setAutoWidth(true).setHeader("ISBN");
-        grid.setItems(query -> sampleBookService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)))
-                .stream());
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 
         // when a row is selected or deselected, populate form
@@ -139,7 +132,6 @@ public class LibrosView extends Div implements BeforeEnterObserver {
                     this.sampleBook = new Libro();
                 }
                 binder.writeBean(this.sampleBook);
-                sampleBookService.update(this.sampleBook);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -177,19 +169,19 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<Long> sampleBookId = event.getRouteParameters().get(SAMPLEBOOK_ID).map(Long::parseLong);
-        if (sampleBookId.isPresent()) {
-            Optional<Libro> sampleBookFromBackend = sampleBookService.get(sampleBookId.get());
-            if (sampleBookFromBackend.isPresent()) {
-                populateForm(sampleBookFromBackend.get());
-            } else {
-                Notification.show(String.format("The requested sampleBook was not found, ID = %s", sampleBookId.get()),
-                        3000, Notification.Position.BOTTOM_START);
-                // when a row is selected but the data is no longer available,
-                // refresh grid
-                refreshGrid();
-                event.forwardTo(LibrosView.class);
-            }
-        }
+//        if (sampleBookId.isPresent()) {
+//            Optional<Libro> sampleBookFromBackend = sampleBookService.get(sampleBookId.get());
+//            if (sampleBookFromBackend.isPresent()) {
+//                populateForm(sampleBookFromBackend.get());
+//            } else {
+//                Notification.show(String.format("The requested sampleBook was not found, ID = %s", sampleBookId.get()),
+//                        3000, Notification.Position.BOTTOM_START);
+//                // when a row is selected but the data is no longer available,
+//                // refresh grid
+//                refreshGrid();
+//                event.forwardTo(LibrosView.class);
+//            }
+//        }
     }
 
     private void createEditorLayout(SplitLayout splitLayout) {
