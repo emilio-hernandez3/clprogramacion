@@ -1,5 +1,8 @@
 package com.uth.biblioteca.views.autores;
 
+import com.uth.biblioteca.controller.AutoresInteractor;
+import com.uth.biblioteca.controller.AutoresInteractorImpl;
+import com.uth.biblioteca.data.Autor;
 import com.uth.biblioteca.views.MainLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -9,27 +12,38 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @PageTitle("Autores")
 @Route(value = "autores", layout = MainLayout.class)
-public class AutoresView extends Div implements AfterNavigationObserver {
+public class AutoresView extends Div implements AfterNavigationObserver, AutoresViewModel {
 
     Grid<Person> grid = new Grid<>();
+    private AutoresInteractor controller;
 
     public AutoresView() {
+    	
         addClassName("autores-view");
         setSizeFull();
+        
+        controller = new AutoresInteractorImpl(this);
+        
         grid.setHeight("100%");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS);
         grid.addComponentColumn(person -> createCard(person));
+        
+        controller.consultarAutores();
+        
         add(grid);
     }
 
@@ -138,7 +152,7 @@ public class AutoresView extends Div implements AfterNavigationObserver {
 
         );
 
-        grid.setItems(persons);
+        //grid.setItems(persons);
     }
 
     private static Person createPerson(String image, String name, String date, String post, String likes,
@@ -154,5 +168,30 @@ public class AutoresView extends Div implements AfterNavigationObserver {
 
         return p;
     }
+
+	@Override
+	public void mostrarAutoresEnLista(List<Autor> items) {
+		List<Person> persons = new ArrayList<>();
+		
+		for (Autor autor : items) {
+			persons.add(createPerson("https://randomuser.me/api/portraits/lego/1.jpg", autor.getNombre(), "May 8",
+					autor.getBiografia(),
+                    "30-01-2000", "500", "20"));
+			
+		}
+		
+
+        grid.setItems(persons);
+	}
+
+	@Override
+	public void mostrarMensajeExito(String mensaje) {
+		Notification.show(mensaje);
+	}
+
+	@Override
+	public void mostrarMensajeError(String mensaje) {
+		Notification.show(mensaje);
+	}
 
 }

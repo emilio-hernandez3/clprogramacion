@@ -1,6 +1,6 @@
 package com.uth.biblioteca.data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 public class Libro  {
 
@@ -8,7 +8,7 @@ public class Libro  {
     private String name;
     private String author;
     private String editorial;
-    private LocalDate publicationDate;
+    private Date publicationdate;
     private Integer pages;
     private String isbn;
 
@@ -30,11 +30,11 @@ public class Libro  {
     public void setAuthor(String author) {
         this.author = author;
     }
-    public LocalDate getPublicationDate() {
-        return publicationDate;
+    public Date getPublicationdate() {
+        return publicationdate;
     }
-    public void setPublicationDate(LocalDate publicationDate) {
-        this.publicationDate = publicationDate;
+    public void setPublicationdate(Date publicationdate) {
+        this.publicationdate = publicationdate;
     }
     public Integer getPages() {
         return pages;

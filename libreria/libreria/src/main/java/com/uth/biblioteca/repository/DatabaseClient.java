@@ -30,7 +30,7 @@ public class DatabaseClient {
 		retrofit = new Retrofit.Builder()
 				.client(cliente)
 				.baseUrl(url)
-				.addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create()))
+				.addConverterFactory(GsonConverterFactory.create(new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'").create()))
 				.build();
 		
 	}

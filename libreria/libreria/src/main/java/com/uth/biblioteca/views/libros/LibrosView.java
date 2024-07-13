@@ -1,5 +1,7 @@
 package com.uth.biblioteca.views.libros;
 
+import com.uth.biblioteca.controller.LibrosInteractor;
+import com.uth.biblioteca.controller.LibrosInteractorImpl;
 import com.uth.biblioteca.data.Libro;
 import com.uth.biblioteca.views.MainLayout;
 import com.vaadin.flow.component.Text;
@@ -24,7 +26,13 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -35,20 +43,28 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.icon.Icon;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @PageTitle("Libros de la Biblioteca")
-@Route(value = "/:sampleBookID?/:action?(edit)", layout = MainLayout.class)
+@Route(value = "/:isbn?/:action?(edit)", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-public class LibrosView extends Div implements BeforeEnterObserver {
+public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewModel {
 
-    private final String SAMPLEBOOK_ID = "sampleBookID";
+	//@Route(value = "/:sampleBookID?/:action?(edit)", layout = MainLayout.class)
+	//private final String SAMPLEBOOK_ID = "sampleBookID";
+    private final String SAMPLEBOOK_ID = "isbn";
     private final String SAMPLEBOOK_EDIT_ROUTE_TEMPLATE = "/%s/edit";
 
     private final Grid<Libro> grid = new Grid<>(Libro.class, false);
@@ -65,12 +81,15 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     private final Button cancel = new Button("Cancelar");
     private final Button save = new Button("Guardar");
 
-    private final BeanValidationBinder<Libro> binder;
-
-    private Libro sampleBook;
+    private Libro libroSeleccionado;
+    private List<Libro> elementos;
+    private LibrosInteractor controller;
 
     public LibrosView() {
         addClassNames("libros-view");
+        
+        elementos = new ArrayList<>();
+        controller = new LibrosInteractorImpl(this);
 
         // Create UI
         SplitLayout splitLayout = new SplitLayout();
@@ -94,7 +113,12 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         grid.addColumn("name").setAutoWidth(true).setHeader("Nombre");
         grid.addColumn("author").setAutoWidth(true).setHeader("Autor");
         grid.addColumn("editorial").setAutoWidth(true).setHeader("Editorial");
-        grid.addColumn("publicationDate").setAutoWidth(true).setHeader("Fecha de Publicación");
+ 
+		//grid.addColumn("publicationdate").setAutoWidth(true).setHeader("Fecha de Publicación");
+		grid.addColumn(new LocalDateRenderer<>(LibrosView::getBookDate,"dd-MM-yyyy"))
+			.setHeader("Fecha de Publicación").setSortable(true)
+             .setComparator(Libro::getPublicationdate);
+		
         grid.addColumn("pages").setAutoWidth(true).setHeader("Pags.");
         grid.addColumn("isbn").setAutoWidth(true).setHeader("ISBN");
         grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
@@ -102,20 +126,15 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         // when a row is selected or deselected, populate form
         grid.asSingleSelect().addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                UI.getCurrent().navigate(String.format(SAMPLEBOOK_EDIT_ROUTE_TEMPLATE, event.getValue().getId()));
+                UI.getCurrent().navigate(String.format(SAMPLEBOOK_EDIT_ROUTE_TEMPLATE, event.getValue().getIsbn()));
             } else {
                 clearForm();
                 UI.getCurrent().navigate(LibrosView.class);
             }
         });
-
-        // Configure Form
-        binder = new BeanValidationBinder<>(Libro.class);
-
-        // Bind fields. This is where you'd define e.g. validation rules
-        binder.forField(pages).withConverter(new StringToIntegerConverter("Only numbers are allowed")).bind("pages");
-
-        binder.bindInstanceFields(this);
+        
+        //ESTO CARGA LOS LIBROS EN PANTALLA
+        controller.consultarLibros();
 
         attachImageUpload(image, imagePreview);
 
@@ -128,10 +147,9 @@ public class LibrosView extends Div implements BeforeEnterObserver {
         save.setId("btnGuardar");
         save.addClickListener(e -> {
             try {
-                if (this.sampleBook == null) {
-                    this.sampleBook = new Libro();
+                if (this.libroSeleccionado == null) {
+                    this.libroSeleccionado = new Libro();
                 }
-                binder.writeBean(this.sampleBook);
                 clearForm();
                 refreshGrid();
                 Notification.show("Data updated");
@@ -141,50 +159,46 @@ public class LibrosView extends Div implements BeforeEnterObserver {
                         "Error updating the data. Somebody else has updated the record while you were making changes.");
                 n.setPosition(Position.MIDDLE);
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
-            } catch (ValidationException validationException) {
-      
-                
-                Notification notification = new Notification();
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-
-                Div text = new Div(new Text("El nombre debe de tener entre 3 a 80 caracteres"));
-
-                Button closeButton = new Button(new Icon("lumo", "cross"));
-                closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-                closeButton.setAriaLabel("Close");
-                closeButton.addClickListener(event -> {
-                    notification.close();
-                });
-
-                HorizontalLayout layout = new HorizontalLayout(text, closeButton);
-                layout.setAlignItems(Alignment.CENTER);
-
-                notification.add(layout);
-                notification.setPosition(Position.BOTTOM_STRETCH);
-                notification.open();
             }
         });
+    }
+    
+    private static LocalDate getBookDate(Libro libro) {
+        return libro.getPublicationdate().toInstant().atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> sampleBookId = event.getRouteParameters().get(SAMPLEBOOK_ID).map(Long::parseLong);
-//        if (sampleBookId.isPresent()) {
-//            Optional<Libro> sampleBookFromBackend = sampleBookService.get(sampleBookId.get());
-//            if (sampleBookFromBackend.isPresent()) {
-//                populateForm(sampleBookFromBackend.get());
-//            } else {
-//                Notification.show(String.format("The requested sampleBook was not found, ID = %s", sampleBookId.get()),
-//                        3000, Notification.Position.BOTTOM_START);
-//                // when a row is selected but the data is no longer available,
-//                // refresh grid
-//                refreshGrid();
-//                event.forwardTo(LibrosView.class);
-//            }
-//        }
+        Optional<String> isbn = event.getRouteParameters().get(SAMPLEBOOK_ID);
+        if (isbn.isPresent()) {
+        	Libro seleccionado = buscarLibroPorIsbn(isbn.get());
+
+            if (seleccionado != null) {
+                populateForm(seleccionado);
+            } else {
+                Notification.show(String.format("El libro con ISBN = %s no existe", isbn.get()),
+                        3000, Notification.Position.BOTTOM_START);
+                // when a row is selected but the data is no longer available,
+                // refresh grid
+                refreshGrid();
+                event.forwardTo(LibrosView.class);
+           }
+        }
     }
 
-    private void createEditorLayout(SplitLayout splitLayout) {
+    private Libro buscarLibroPorIsbn(String isbn) {
+		Libro encontrado = null;
+		for (Libro libro : elementos) {
+			if(libro.getIsbn().equals(isbn)) {
+				encontrado = libro;
+				break;
+			}
+		}
+		return encontrado;
+	}
+
+	private void createEditorLayout(SplitLayout splitLayout) {
         Div editorLayoutDiv = new Div();
         editorLayoutDiv.setClassName("editor-layout");
 
@@ -271,10 +285,10 @@ public class LibrosView extends Div implements BeforeEnterObserver {
                     () -> new ByteArrayInputStream(uploadBuffer.toByteArray()));
             preview.setSrc(resource);
             preview.setVisible(true);
-            if (this.sampleBook == null) {
-                this.sampleBook = new Libro();
+            if (this.libroSeleccionado == null) {
+                this.libroSeleccionado = new Libro();
             }
-            this.sampleBook.setImage(uploadBuffer.toByteArray());
+            this.libroSeleccionado.setImage(uploadBuffer.toByteArray());
         });
         preview.setVisible(false);
     }
@@ -289,15 +303,72 @@ public class LibrosView extends Div implements BeforeEnterObserver {
     }
 
     private void populateForm(Libro value) {
-        this.sampleBook = value;
-        binder.readBean(this.sampleBook);
-        this.imagePreview.setVisible(value != null);
-        if (value == null || value.getImage() == null) {
-            this.image.clearFileList();
+        this.libroSeleccionado = value;
+        
+        if(value != null) {
+	        this.author.setValue(value.getAuthor());
+	        this.name.setValue(value.getName());
+	        this.pages.setValue(String.valueOf(value.getPages()));
+	        this.isbn.setValue(value.getIsbn());
+	        this.editorial.setValue(value.getEditorial());
+	        this.publicationDate.setValue(getBookDate(value));
+	       
+	        this.imagePreview.setVisible(value != null);
+	        if (value.getImage() == null) {
+	            this.image.clearFileList();
+	            this.imagePreview.setSrc("");
+	        } else {
+	            this.imagePreview.setSrc("data:image;base64," + Base64.getEncoder().encodeToString(value.getImage()));
+	        }
+        }else {
+        	this.author.setValue("");
+	        this.name.setValue("");
+	        this.pages.setValue("");
+	        this.isbn.setValue("");
+	        this.editorial.setValue("");
+	        this.publicationDate.setValue(null);
+	        
+	        this.image.clearFileList();
             this.imagePreview.setSrc("");
-        } else {
-            this.imagePreview.setSrc("data:image;base64," + Base64.getEncoder().encodeToString(value.getImage()));
         }
 
     }
+
+	@Override
+	public void mostrarLibrosEnGrid(List<Libro> items) {
+		Collection<Libro> itemsCollection = items;
+		grid.setItems(itemsCollection);
+		this.elementos = items;
+	}
+
+	@Override
+	public void mostrarMensajeExito(String mensaje) {
+		Notification.show(mensaje);
+	}
+
+	@Override
+	public void mostrarMensajeError(String mensaje) {
+		Notification.show(mensaje);
+	}
+	
+	public void showMessage(String message) {
+		 Notification notification = new Notification();
+         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+
+         Div text = new Div(new Text(message));
+
+         Button closeButton = new Button(new Icon("lumo", "cross"));
+         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+         closeButton.setAriaLabel("Close");
+         closeButton.addClickListener(event -> {
+             notification.close();
+         });
+
+         HorizontalLayout layout = new HorizontalLayout(text, closeButton);
+         layout.setAlignItems(Alignment.CENTER);
+
+         notification.add(layout);
+         notification.setPosition(Position.BOTTOM_STRETCH);
+         notification.open();
+	}
 }
