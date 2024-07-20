@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -56,6 +57,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.ArrayList;
+import com.uth.biblioteca.data.Autor;
+import java.util.ArrayList;
 
 @PageTitle("Libros de la Biblioteca")
 @Route(value = "/:isbn?/:action?(edit)", layout = MainLayout.class)
@@ -72,7 +75,7 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
     private Upload image;
     private Image imagePreview;
     private TextField name;
-    private TextField author;
+    private ComboBox<Autor> autor;
     private DatePicker publicationDate;
     private TextField pages;
     private TextField isbn;
@@ -83,12 +86,15 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
 
     private Libro libroSeleccionado;
     private List<Libro> elementos;
+    private List<Autor> autoresObtenidos;
     private LibrosInteractor controller;
 
     public LibrosView() {
         addClassNames("libros-view");
         
         elementos = new ArrayList<>();
+        autoresObtenidos = new ArrayList<>();
+        
         controller = new LibrosInteractorImpl(this);
 
         // Create UI
@@ -135,6 +141,7 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         
         //ESTO CARGA LOS LIBROS EN PANTALLA
         controller.consultarLibros();
+        controller.consultarAutores();
 
         attachImageUpload(image, imagePreview);
 
@@ -148,11 +155,38 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         save.addClickListener(e -> {
             try {
                 if (this.libroSeleccionado == null) {
+                	//SI ENTRA AQUI ESTOY CREANDO UN NUEVO REGISTRO
+                	
                     this.libroSeleccionado = new Libro();
+                    this.libroSeleccionado.setAuthor(autor.getValue().getNombre());
+                    this.libroSeleccionado.setEditorial(editorial.getValue());
+                    this.libroSeleccionado.setIsbn(isbn.getValue());
+                    this.libroSeleccionado.setName(name.getValue());
+                    this.libroSeleccionado.setPages(Integer.valueOf(pages.getValue()));
+                    
+                    ZoneId defaultZoneId = ZoneId.systemDefault();
+                    Date fechaPub = Date.from(publicationDate.getValue().atStartOfDay(defaultZoneId).toInstant());
+                    this.libroSeleccionado.setPublicationdate(fechaPub);
+                    
+                    controller.crearLibro(libroSeleccionado);
+                }else {
+                	
+                	//SI ENTRA AQUI ESTOY MODIFICANDO UN LIBRO EXISTENTE
+                    this.libroSeleccionado.setAuthor(autor.getValue().getNombre());
+                    this.libroSeleccionado.setEditorial(editorial.getValue());
+                    
+                    this.libroSeleccionado.setName(name.getValue());
+                    this.libroSeleccionado.setPages(Integer.valueOf(pages.getValue()));
+                    
+                    ZoneId defaultZoneId = ZoneId.systemDefault();
+                    Date fechaPub = Date.from(publicationDate.getValue().atStartOfDay(defaultZoneId).toInstant());
+                    this.libroSeleccionado.setPublicationdate(fechaPub);
+                    
+                    controller.actualizarLibro(libroSeleccionado);
+                	
                 }
                 clearForm();
                 refreshGrid();
-                Notification.show("Data updated");
                 UI.getCurrent().navigate(LibrosView.class);
             } catch (ObjectOptimisticLockingFailureException exception) {
                 Notification n = Notification.show(
@@ -223,12 +257,13 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         name.setMaxLength(80);
         name.setErrorMessage("El nombre debe de tener entre 3 a 80 caracteres");
         
-        
-        author = new TextField("Autor");
-        author.setId("txtAutorLibro");
-        author.setPrefixComponent(VaadinIcon.USER_STAR.create());
-        author.setMinLength(5);
-        author.setMaxLength(65);
+        autor = new ComboBox<>("Autor");
+        //autor.setItems(filter, DataService.getPeople());
+        autor.setItemLabelGenerator(
+                autor -> autor.getNombre());
+        autor.setRenderer(createRenderer());
+        autor.getStyle().set("--vaadin-combo-box-overlay-width", "16em");
+        autor.setId("cbAutorLibro");
         
         publicationDate = new DatePicker("Fecha de Publicación");
         publicationDate.setId("publicationDatePicker");
@@ -249,13 +284,30 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         editorial.setPrefixComponent(VaadinIcon.BOOK.create());
         editorial.setHelperText("Nombre de la Casa Editorial");
         
-        formLayout.add(imageLabel, image, name, author, editorial, publicationDate, pages, isbn);
+        formLayout.add(imageLabel, image, name, autor, editorial, publicationDate, pages, isbn);
 
         editorDiv.add(formLayout);
         createButtonLayout(editorLayoutDiv);
 
         splitLayout.addToSecondary(editorLayoutDiv);
     }
+	
+	private Renderer<Autor> createRenderer() {
+	    StringBuilder tpl = new StringBuilder();
+	    tpl.append("<div style=\"display: flex;\">");
+	    tpl.append(
+	            "  <img style=\"height: var(--lumo-size-m); margin-right: var(--lumo-space-s);\" src=\"https://randomuser.me/api/portraits/lego/1.jpg\" alt=\"Portrait of ${item.nombre}\" />");
+	    tpl.append("  <div>");
+	    tpl.append("    ${item.nombre}");
+	    tpl.append(
+	            "    <div style=\"font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color);\">${item.nacimiento}</div>");
+	    tpl.append("  </div>");
+	    tpl.append("</div>");
+
+	    return LitRenderer.<Autor> of(tpl.toString())
+	            .withProperty("nombre", Autor::getNombre)
+	            .withProperty("nacimiento", Autor::getNacimiento);
+	}
 
     private void createButtonLayout(Div editorLayoutDiv) {
         HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -296,6 +348,7 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
     private void refreshGrid() {
         grid.select(null);
         grid.getDataProvider().refreshAll();
+        controller.consultarLibros();
     }
 
     private void clearForm() {
@@ -306,10 +359,12 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         this.libroSeleccionado = value;
         
         if(value != null) {
-	        this.author.setValue(value.getAuthor());
+        	Autor autor = buscarAutores(value.getAuthor());
+	        this.autor.setValue(autor);
 	        this.name.setValue(value.getName());
 	        this.pages.setValue(String.valueOf(value.getPages()));
 	        this.isbn.setValue(value.getIsbn());
+	        this.isbn.setReadOnly(true);
 	        this.editorial.setValue(value.getEditorial());
 	        this.publicationDate.setValue(getBookDate(value));
 	       
@@ -321,7 +376,7 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
 	            this.imagePreview.setSrc("data:image;base64," + Base64.getEncoder().encodeToString(value.getImage()));
 	        }
         }else {
-        	this.author.setValue("");
+        	this.autor.clear();
 	        this.name.setValue("");
 	        this.pages.setValue("");
 	        this.isbn.setValue("");
@@ -333,6 +388,17 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         }
 
     }
+
+	private Autor buscarAutores(String author) {
+		Autor obtenido = null;
+		for (Autor autor : autoresObtenidos) {
+			if(autor.getNombre().equalsIgnoreCase(author)) {
+				obtenido = autor;
+				break;
+			}
+		}
+		return obtenido;
+	}
 
 	@Override
 	public void mostrarLibrosEnGrid(List<Libro> items) {
@@ -370,5 +436,12 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
          notification.add(layout);
          notification.setPosition(Position.BOTTOM_STRETCH);
          notification.open();
+	}
+
+	@Override
+	public void mostrarAutoresEnCombobox(List<Autor> items) {
+		Collection<Autor> itemsCollection = items;
+		autor.setItems(itemsCollection);
+		this.autoresObtenidos = items;
 	}
 }

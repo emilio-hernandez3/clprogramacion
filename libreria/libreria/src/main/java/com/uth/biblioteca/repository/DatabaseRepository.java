@@ -1,11 +1,16 @@
 package com.uth.biblioteca.repository;
 
 import com.uth.biblioteca.data.AutoresResponse;
+import com.uth.biblioteca.data.Libro;
 import com.uth.biblioteca.data.LibrosResponse;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 public interface DatabaseRepository {
 
@@ -29,4 +34,18 @@ public interface DatabaseRepository {
 	
 	///pls/apex/{WORKSPACE}/{MODULO}/{PLANTILLA}
 	
+	
+	@Headers({
+	    "Accept: application/json",
+	    "User-Agent: Retrofit-Sample-App"
+	})
+	@POST("/pls/apex/ingenieria_uth/appbiblioteca/libros")
+	Call<ResponseBody> crearLibro(@Body Libro nuevo);
+	
+	@Headers({
+	    "Accept: application/json",
+	    "User-Agent: Retrofit-Sample-App"
+	})
+	@PUT("/pls/apex/ingenieria_uth/appbiblioteca/libros")
+	Call<ResponseBody> actualizarLibro(@Body Libro actual);
 }

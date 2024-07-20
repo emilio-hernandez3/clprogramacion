@@ -174,7 +174,7 @@ public class AutoresView extends Div implements AfterNavigationObserver, Autores
 		List<Person> persons = new ArrayList<>();
 		
 		for (Autor autor : items) {
-			persons.add(createPerson("https://randomuser.me/api/portraits/lego/1.jpg", autor.getNombre(), "May 8",
+			persons.add(createPerson("https://randomuser.me/api/portraits/lego/1.jpg", autor.getNombre(), autor.getNacimiento(),
 					autor.getBiografia(),
                     "30-01-2000", "500", "20"));
 			

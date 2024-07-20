@@ -5,6 +5,7 @@ public class Autor {
 	private int id;
 	private String nombre;
 	private String biografia;
+	private String nacimiento;
 	
 	public int getId() {
 		return id;
@@ -23,6 +24,12 @@ public class Autor {
 	}
 	public void setBiografia(String biografia) {
 		this.biografia = biografia;
+	}
+	public String getNacimiento() {
+		return nacimiento;
+	}
+	public void setNacimiento(String nacimiento) {
+		this.nacimiento = nacimiento;
 	}
 	
 	

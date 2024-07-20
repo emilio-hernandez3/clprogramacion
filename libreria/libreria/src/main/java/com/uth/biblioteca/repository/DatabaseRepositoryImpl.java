@@ -3,7 +3,10 @@ package com.uth.biblioteca.repository;
 import java.io.IOException;
 
 import com.uth.biblioteca.data.AutoresResponse;
+import com.uth.biblioteca.data.Libro;
 import com.uth.biblioteca.data.LibrosResponse;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -39,6 +42,20 @@ public class DatabaseRepositoryImpl {
 		}
 	}
 	
+	public boolean crearLibro(Libro nuevo) throws IOException {
+		//AQUI LE DIGO QUE OPERACIÓN QUIERO QUE EJECUTE
+		Call<ResponseBody> call = client.getClient().crearLibro(nuevo);
+		Response<ResponseBody> response = call.execute();//AQUI ES DONDE LLAMO A LA BASE DE DATOS
+		return response.isSuccessful();
+	}
+	
+	public boolean actualizarLibro(Libro actual) throws IOException {
+		//AQUI LE DIGO QUE OPERACIÓN QUIERO QUE EJECUTE
+		Call<ResponseBody> call = client.getClient().actualizarLibro(actual);
+		Response<ResponseBody> response = call.execute();//AQUI ES DONDE LLAMO A LA BASE DE DATOS
+		return response.isSuccessful();
+	}
+	
 	public AutoresResponse consultarAutores() throws IOException {
 		//AQUI LE DIGO QUE OPERACIÓN QUIERO QUE EJECUTE
 		Call<AutoresResponse> call = client.getClient().getAutores();
@@ -49,4 +66,6 @@ public class DatabaseRepositoryImpl {
 			return null;
 		}
 	}
+	
+	
 }
