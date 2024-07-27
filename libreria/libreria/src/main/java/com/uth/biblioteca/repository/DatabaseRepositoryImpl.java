@@ -67,5 +67,12 @@ public class DatabaseRepositoryImpl {
 		}
 	}
 	
+	public boolean eliminarLibro(String isbn) throws IOException {
+		//AQUI LE DIGO QUE OPERACIÓN QUIERO QUE EJECUTE
+		Call<ResponseBody> call = client.getClient().eliminarLibro(isbn);
+		Response<ResponseBody> response = call.execute();//AQUI ES DONDE LLAMO A LA BASE DE DATOS
+		return response.isSuccessful();
+	}
+	
 	
 }

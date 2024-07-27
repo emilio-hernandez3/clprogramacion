@@ -7,4 +7,5 @@ public interface LibrosInteractor {
 	void consultarAutores();
 	void crearLibro(Libro nuevo);
 	void actualizarLibro(Libro actual);
+	void eliminarLibro(String isbn);
 }

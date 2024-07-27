@@ -7,10 +7,12 @@ import com.uth.biblioteca.data.LibrosResponse;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Query;
 
 public interface DatabaseRepository {
 
@@ -48,4 +50,10 @@ public interface DatabaseRepository {
 	})
 	@PUT("/pls/apex/ingenieria_uth/appbiblioteca/libros")
 	Call<ResponseBody> actualizarLibro(@Body Libro actual);
+	
+	@Headers({
+	    "User-Agent: Retrofit-Sample-App"
+	})
+	@DELETE("/pls/apex/ingenieria_uth/appbiblioteca/libros")
+	Call<ResponseBody> eliminarLibro(@Query("id") String id);
 }

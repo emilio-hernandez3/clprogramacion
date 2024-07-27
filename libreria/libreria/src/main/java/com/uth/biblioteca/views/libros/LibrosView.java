@@ -13,7 +13,10 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -59,6 +62,8 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import com.uth.biblioteca.data.Autor;
 import java.util.ArrayList;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 
 @PageTitle("Libros de la Biblioteca")
 @Route(value = "/:isbn?/:action?(edit)", layout = MainLayout.class)
@@ -88,12 +93,14 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
     private List<Libro> elementos;
     private List<Autor> autoresObtenidos;
     private LibrosInteractor controller;
+    private String isbn_seleccionado;
 
     public LibrosView() {
         addClassNames("libros-view");
         
         elementos = new ArrayList<>();
         autoresObtenidos = new ArrayList<>();
+        isbn_seleccionado ="";
         
         controller = new LibrosInteractorImpl(this);
 
@@ -138,6 +145,36 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
                 UI.getCurrent().navigate(LibrosView.class);
             }
         });
+        
+        
+        
+        GridContextMenu<Libro> menu = grid.addContextMenu();
+        GridMenuItem<Libro> open = menu.addItem("Exportar", event -> {
+        });
+        open.addComponentAsFirst(createIcon(VaadinIcon.FILE_PROCESS));
+        
+        menu.add(new Hr());
+        GridMenuItem<Libro> delete = menu.addItem("Eliminar", event -> {
+        	isbn_seleccionado = event.getItem().get().getIsbn();
+        	
+        	ConfirmDialog dialog = new ConfirmDialog();
+            dialog.setHeader("Confirme la Eliminación");
+            dialog.setText("¿Deseas eliminar este libro (ISBN: "+isbn_seleccionado+") ?");
+
+            dialog.setCancelable(true);
+            dialog.setCancelText("Cancelar");
+
+            dialog.setConfirmText("Eliminar");
+            dialog.setConfirmButtonTheme("error primary");
+            dialog.addConfirmListener(event2 -> {
+            	//aqui colocar el llamado al controller para eliminar el libro
+            	controller.eliminarLibro(isbn_seleccionado);
+            	refreshGrid();
+            });
+        	
+            dialog.open();
+        });
+        delete.addComponentAsFirst(createIcon(VaadinIcon.TRASH));
         
         //ESTO CARGA LOS LIBROS EN PANTALLA
         controller.consultarLibros();
@@ -195,6 +232,14 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
                 n.addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
+    }
+    
+    private Component createIcon(VaadinIcon vaadinIcon) {
+        Icon icon = vaadinIcon.create();
+        icon.getStyle().set("color", "var(--lumo-secondary-text-color)")
+                .set("margin-inline-end", "var(--lumo-space-s")
+                .set("padding", "var(--lumo-space-xs");
+        return icon;
     }
     
     private static LocalDate getBookDate(Libro libro) {

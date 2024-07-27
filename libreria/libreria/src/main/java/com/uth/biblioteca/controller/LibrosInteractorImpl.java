@@ -94,5 +94,22 @@ public class LibrosInteractorImpl implements LibrosInteractor {
 	}
 
 	
-	
+	@Override
+	public void eliminarLibro(String isbn) {
+		//ESTRUCTURA TRY...CATCH PARA MANEJO DE ERRORES
+		try{
+			//EL CODIGO QUE SE EJECUTA EN EL HAPPY PATH
+			boolean actualizado = this.modelo.eliminarLibro(isbn);
+			if(actualizado) {
+				this.vista.mostrarMensajeExito("Libro eliminado correctamente!");
+			}else {
+				this.vista.mostrarMensajeError("Hubo un problema al borrar el libro");
+			}
+			
+		}catch(Exception error) {
+			//EL CODIGO QUE SE EJECUTA CUANDO HAY PROBLEMAS
+			error.printStackTrace();
+			this.vista.mostrarMensajeError("Ha ocurrido un problema, revisa tu conexión a internet");
+		}
+	}
 }
