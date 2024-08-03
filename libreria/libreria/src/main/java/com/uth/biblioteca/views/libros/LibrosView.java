@@ -17,6 +17,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -62,8 +63,13 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import com.uth.biblioteca.data.Autor;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+
+import com.uth.biblioteca.services.ReportGenerator;
+import com.uth.biblioteca.data.LibrosReport;
 
 @PageTitle("Libros de la Biblioteca")
 @Route(value = "/:isbn?/:action?(edit)", layout = MainLayout.class)
@@ -150,6 +156,8 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
         
         GridContextMenu<Libro> menu = grid.addContextMenu();
         GridMenuItem<Libro> open = menu.addItem("Exportar", event -> {
+        	Notification.show("Generando reporte PDF...");
+        	generarReporte();
         });
         open.addComponentAsFirst(createIcon(VaadinIcon.FILE_PROCESS));
         
@@ -233,6 +241,35 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
             }
         });
     }
+    
+    private void generarReporte() {
+    	ReportGenerator generador = new ReportGenerator();
+    	LibrosReport datasource = new LibrosReport();
+    	datasource.setData(elementos);
+    	String reportName = "listado_libros";
+    	Map<String, Object> parameters = new HashMap<>();
+    	if("listado_libros".equals(reportName)) {
+    		parameters.put("QR", "qrcode1.png");
+    	}else {
+    		parameters.put("QR", "qrcode2.png");
+    	}
+    	
+    	boolean generado = generador.generarReportePDF(reportName, parameters, datasource);
+    	if(generado) {
+    		String ubicacion = generador.getReportPath();
+    		Anchor url = new Anchor(ubicacion, "Abrir Reporte");
+    		url.setTarget("_blank");
+    		
+    		Notification notification = new Notification(url);
+    	    notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    	    notification.setPosition(Position.MIDDLE);
+    	    notification.setDuration(15000);
+    	    notification.open();
+    	}else {
+    		//OCURRIO UN ERROR
+    		mostrarMensajeError("Ocurrió un problema al generar el reporte :(");
+    	}
+	}
     
     private Component createIcon(VaadinIcon vaadinIcon) {
         Icon icon = vaadinIcon.create();
@@ -430,6 +467,7 @@ public class LibrosView extends Div implements BeforeEnterObserver, LibrosViewMo
 	        
 	        this.image.clearFileList();
             this.imagePreview.setSrc("");
+            this.isbn.setReadOnly(false);
         }
 
     }
